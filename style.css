@@ -1,0 +1,81 @@
+
+:root {
+
+    --ptr: "52,79,47,5f,53,54,52,49,58,5f,35,30,39,30,5f,4e,4f,44,45"; 
+    
+    --rog-red: #ff0032;
+    --dark-bg: #0b0b0b;
+    --panel-bg: #1a1a1a;
+    --text-dim: #888;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.node {
+    background: var(--panel-bg);
+    border: 1px solid #333;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 400px;
+    text-align: center;
+}
+
+.head {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--rog-red);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+}
+
+h1 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+
+#status {
+    font-weight: bold;
+    color: var(--rog-red);
+    text-shadow: 0 0 5px var(--rog-red);
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.6;
+        text-shadow: 0 0 5px var(--rog-red);
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 20px var(--rog-red), 0 0 30px var(--rog-red);
+    }
+}
+
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: -1;
+}
