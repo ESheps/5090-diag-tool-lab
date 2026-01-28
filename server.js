@@ -4,7 +4,12 @@ const path = require('path');
 const app = express();
 
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/api/handshake-proxy', async (req, res) => {
     try {
@@ -20,10 +25,10 @@ app.post('/api/sync-bridge', async (req, res) => {
         const response = await axios.post('http://127.0.0.1:8080/v1/verify', req.body);
         res.status(200).json(response.data);
     } catch (error) {
-        res.status(500).json({ error: 'Sync bridge failed' });
+        res.status(500).json({ status: 'sync_error' });
     }
 });
 
 app.listen(3000, () => {
-    console.log('[*] Forensic Bridge active at http://localhost:3000');
+    console.log('[*] Forensic Bridge active on port 3000');
 });
