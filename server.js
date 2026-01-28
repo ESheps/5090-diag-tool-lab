@@ -1,18 +1,29 @@
 const express = require('express');
-const cors = require('cors');
+const axios = require('axios');
+const path = require('path');
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/v1/verify', (req, res) => {
-    const { id, ts } = req.body;
-    console.log(`[!] EXFILTRATION RECEIVED`);
-    console.log(`[>] Source ID: ${id}`);
-    console.log(`[>] Timestamp: ${new Date(ts).toLocaleString()}`);
-    
-
-    res.json({ status: "success" });
+app.get('/api/handshake-proxy', async (req, res) => {
+    try {
+        const response = await axios.get('http://127.0.0.1:8080/v1/handshake');
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Handshake bridge failed' });
+    }
 });
 
-app.listen(3000, () => console.log('Attacker Node listening on port 3000'));
+app.post('/api/sync-bridge', async (req, res) => {
+    try {
+        const response = await axios.post('http://127.0.0.1:8080/v1/verify', req.body);
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Sync bridge failed' });
+    }
+});
+
+app.listen(3000, () => {
+    console.log('[*] Forensic Bridge active at http://localhost:3000');
+});

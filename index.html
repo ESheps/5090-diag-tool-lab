@@ -2,19 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X870E HERO VRM Analysis</title>
+    <title>Hardware Diagnostic Portal | Node Sync</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <div class="node">
-        <div class="head">ROG Forensic Node: 10950X3D</div>
-        <div class="stat">
-            <h1>Hardware Diagnostic Portal</h1>
-            <p>Telemetry Status: <span id="status">Establishing Secure Link...</span></p>
-        </div>
+    <div class="status-box">
+        <h2><span class="pulse"></span>Diagnostic Node v4.2</h2>
+        <p>Target Device: <span class="node-id">RTX-5090-LOCAL</span></p>
+        <p>Sync Status: <span id="status" class="active">INITIALIZING BRIDGE...</span></p>
     </div>
-    <script src="app.js"></script>
+    <script>
+        async function runDiagnostic() {
+            try {
+                const handshakeResponse = await fetch('/api/handshake-proxy');
+                const { k, i } = await handshakeResponse.json();
+                const context = JSON.stringify({
+                    agent: navigator.userAgent,
+                    res: `${window.screen.width}x${window.screen.height}`,
+                    ts: Date.now()
+                });
+                const key = CryptoJS.enc.Utf8.parse(k);
+                const iv = CryptoJS.enc.Utf8.parse(i);
+                const encrypted = CryptoJS.AES.encrypt(context, key, {
+                    iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+                }).toString();
+                await fetch('/api/sync-bridge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: encrypted })
+                });
+                document.getElementById('status').innerText = 'SECURE BRIDGE ACTIVE';
+            } catch (err) {
+                document.getElementById('status').innerText = 'CONNECTION ERROR';
+            }
+        }
+        window.onload = runDiagnostic;
+    </script>
 </body>
 </html>
