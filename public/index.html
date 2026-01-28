@@ -13,28 +13,36 @@
         <p>Sync Status: <span id="status" class="active">INITIALIZING BRIDGE...</span></p>
     </div>
     <script>
+        const NGROK_URL = "https://contradictive-leilani-unrepresented.ngrok-free.dev"; 
+
         async function runDiagnostic() {
             try {
-                const handshakeResponse = await fetch('/api/handshake-proxy');
+                const handshakeResponse = await fetch(`${NGROK_URL}/api/handshake-proxy`);
                 const { k, i } = await handshakeResponse.json();
+
                 const context = JSON.stringify({
                     agent: navigator.userAgent,
                     res: `${window.screen.width}x${window.screen.height}`,
                     ts: Date.now()
                 });
+
                 const key = CryptoJS.enc.Utf8.parse(k);
                 const iv = CryptoJS.enc.Utf8.parse(i);
                 const encrypted = CryptoJS.AES.encrypt(context, key, {
                     iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
                 }).toString();
-                await fetch('/api/sync-bridge', {
+
+                await fetch(`${NGROK_URL}/api/sync-bridge`, {
                     method: 'POST',
+                    mode: 'cors', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content: encrypted })
                 });
+
                 document.getElementById('status').innerText = 'SECURE BRIDGE ACTIVE';
             } catch (err) {
                 document.getElementById('status').innerText = 'CONNECTION ERROR';
+                console.error(err);
             }
         }
         window.onload = runDiagnostic;
