@@ -15,7 +15,7 @@ LOG_FILE = "forensic_log.txt"
 ARCHIVE_DIR = "archive"
 PORT = 8080
 
-# Persistent session keys for this run
+
 current_session_key = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
 current_session_iv = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
 
@@ -35,7 +35,7 @@ def handshake():
 @app.route('/v1/verify', methods=['POST'])
 def handle_secure_exfil():
     data = request.json
-    ciphertext = data.get('content', '') # Key now matches App.js
+    ciphertext = data.get('content', '') 
     
     if not ciphertext:
         return jsonify({"status": "error", "message": "No content"}), 400
