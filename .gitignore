@@ -1,13 +1,12 @@
-# Forensic Data
+
 forensic_log.txt
 archive/
 *.log
 
-# Environment & Secrets
 .env
 .venv/
 
-# Node/System Junk
+
 node_modules/
 package-lock.json
 .DS_Store
