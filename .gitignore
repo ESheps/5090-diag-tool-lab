@@ -10,3 +10,10 @@ archive/
 node_modules/
 package-lock.json
 .DS_Store
+
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.pem
+*.key
+cert.pem
